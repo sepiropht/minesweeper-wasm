@@ -2,7 +2,7 @@ extern crate js_sys;
 use web_sys::console;
 use wasm_bindgen::prelude::*;
 
-pub fn annotate(minefield: Vec<String>) -> String {
+pub fn annotate(minefield: Vec<String>) -> Vec<String> {
     minefield
         .iter()
         .map(|row| row.split("").collect::<Vec<&str>>())

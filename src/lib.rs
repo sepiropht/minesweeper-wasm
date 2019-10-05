@@ -17,11 +17,25 @@ pub fn main_js() -> Result<(), JsValue> {
     // It's disabled in release mode so it doesn't bloat up the file size.
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
 
     // Your code goes here!
     console::log_1(&JsValue::from_str("Hello world!"));
     let board = board::generate(board::LEVEL::EASY);
     console::log_1(&JsValue::from(board.len() as u32));
+    let boardDom = document.query_selector("#board").expect("not fail").unwrap();
+    console::log_1(&JsValue::from_str("taille"));
+    //console::log_1(&JsValue::from(board::annotate(board).len() as u32));
+    console::log_1(&JsValue::from_str("taille"));
+    let final_board = board::annotate(board);
+    for row in final_board.iter() {
+        row.chars().for_each(|_| {
+            let div = document.create_element("button").expect("no global `window` exists");
+            div.set_class_name("square");
+            boardDom.append_child(&div).expect("not fail");
+        });
+    }
 
         //     console::log_1(&JsValue::from(i as u32));
         //     console::log_1(&JsValue::from_str(&line));
