@@ -5,11 +5,9 @@ use wasm_bindgen::prelude::*;
 pub fn annotate(minefield: Vec<String>) -> Vec<String> {
     minefield
         .iter()
-        .map(|row| row.split("").collect::<Vec<&str>>())
         .enumerate()
         .map(|(y, row)| {
-            row.iter()
-                .filter(|c| !c.is_empty())
+            row.chars()
                 .enumerate()
                 .map(|(x, cell)| get_annotation(&minefield, y, x, cell))
                 .collect::<String>()
@@ -17,14 +15,14 @@ pub fn annotate(minefield: Vec<String>) -> Vec<String> {
         .collect()
 }
 
-fn get_annotation(minefield: &Vec<String>, y: usize, x: usize, current_cell: &str) -> char {
+fn get_annotation(minefield: &Vec<String>, y: usize, x: usize, current_cell: char) -> char {
     match current_cell {
-        " " => match std::char::from_digit(mines_total(minefield, y, x), 10) {
+        ' ' => match std::char::from_digit(mines_total(minefield, y, x), 10) {
             Some('0') => ' ',
             Some(val) => val,
             None => unreachable!(),
         },
-        val => val.chars().next().unwrap(),
+        val => val,
     }
 }
 
@@ -47,14 +45,7 @@ fn mines_total(matrix: &Vec<String>, y: usize, x: usize) -> u32 {
 }
 
 fn is_cell_mined(matrix: &Vec<String>, y: usize, x: usize) -> usize {
-    match matrix.get(y) {
-        Some(row) => row
-            .chars()
-            .enumerate()
-            .filter(|(i, value)| value == &'*' && &x == i)
-            .count(),
-        None => 0,
-    }
+    matrix.get(y).map_or(0, |row| if row.chars().nth(x) == Some('*') { 1 } else { 0 })
 }
 
 
