@@ -2,50 +2,31 @@ extern crate js_sys;
 use web_sys::console;
 use wasm_bindgen::prelude::*;
 
-pub fn annotate(minefield: Vec<String>) -> Vec<String> {
-    minefield
-        .iter()
-        .enumerate()
-        .map(|(y, row)| {
-            row.chars()
-                .enumerate()
-                .map(|(x, cell)| get_annotation(&minefield, y, x, cell))
-                .collect::<String>()
-        })
-        .collect()
-}
+static NEIGBOURHOOD_OFFSETS: &'static [(i32, i32)] = &[
+    (-1, -1), (0, -1), (1, -1),
+    (-1,  0),          (1,  0),
+    (-1,  1), (0,  1), (1,  1),
+];
 
-fn get_annotation(minefield: &Vec<String>, y: usize, x: usize, current_cell: char) -> char {
-    match current_cell {
-        ' ' => match std::char::from_digit(mines_total(minefield, y, x), 10) {
-            Some('0') => ' ',
-            Some(val) => val,
-            None => unreachable!(),
-        },
-        val => val,
-    }
-}
-
-fn mines_total(matrix: &Vec<String>, y: usize, x: usize) -> u32 {
-    (if x != 0 {
-        is_cell_mined(matrix, y + 1, x - 1) + is_cell_mined(matrix, y, x - 1)
-    } else {
-        0
-    } + if y != 0 {
-        is_cell_mined(matrix, y - 1, x) + is_cell_mined(matrix, y - 1, x + 1)
-    } else {
-        0
-    } + if x != 0 && y != 0 {
-        is_cell_mined(matrix, y - 1, x - 1)
-    } else {
-        0
-    } + is_cell_mined(matrix, y, x + 1)
-        + is_cell_mined(matrix, y + 1, x + 1)
-        + is_cell_mined(matrix, y + 1, x)) as u32
-}
-
-fn is_cell_mined(matrix: &Vec<String>, y: usize, x: usize) -> usize {
-    matrix.get(y).map_or(0, |row| if row.chars().nth(x) == Some('*') { 1 } else { 0 })
+pub fn annotate(field: Vec<String>) -> Vec<String> {
+    let height = field.len() as i32;
+    (0..height).map(|y| {
+        let width = field[y as usize].len() as i32;
+        (0..width).map(|x| {
+            if field[y as usize].as_bytes()[x as usize] == b'*' {
+                '*'
+            } else {
+                match NEIGBOURHOOD_OFFSETS.iter()
+                    .map(|&(ox, oy)| (x + ox, y + oy))
+                    .filter(|&(x, y)| (0 <= x && x < width) && (0 <= y && y < height))
+                    .filter(|&(x, y)| field[y as usize].as_bytes()[x as usize] == b'*')
+                    .count() {
+                        0 => ' ',
+                        n => (n as u8 + '0' as u8) as char
+                    }
+            }
+        }).collect()
+    }).collect()
 }
 
 
