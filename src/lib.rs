@@ -21,20 +21,30 @@ pub fn main_js() -> Result<(), JsValue> {
     let document = window.document().expect("should have a document on window");
 
     // Your code goes here!
-    console::log_1(&JsValue::from_str("Hello world!"));
+  //  console::log_1(&JsValue::from_str("Hello world!"));
     let board = board::generate(board::LEVEL::EASY);
-    console::log_1(&JsValue::from(board.len() as u32));
+    //console::log_1(&JsValue::from(board.len() as u32));
     let boardDom = document.query_selector("#board").expect("not fail").unwrap();
-    console::log_1(&JsValue::from_str("taille"));
+   // console::log_1(&JsValue::from_str("taille"));
     //console::log_1(&JsValue::from(board::annotate(board).len() as u32));
-    console::log_1(&JsValue::from_str("taille"));
+   // console::log_1(&JsValue::from_str("taille"));
     let final_board = board::annotate(board);
-    for row in final_board.iter() {
-        row.chars().for_each(|_| {
+    for (y, row) in final_board.iter().enumerate() {
+        console::log_1(&JsValue::from_str(&"BEGINNNNNNNNNNNNNNNNNNNNNNNNNNNN row"));
+        console::log_1(&JsValue::from(row));
+      
+     //   console::log_1(&JsValue::from_str(row));
+        row.chars().enumerate().for_each(|(x,_)| {
             let div = document.create_element("button").expect("no global `window` exists");
+            console::log_1(&JsValue::from_str(&"x begin"));
+            console::log_1(&JsValue::from(x as u32));
+            console::log_1(&JsValue::from_str(&"x end"));
             div.set_class_name("square");
+            div.set_attribute("data-x", &format!("{}", x)).expect("no global `window` exists");
+            div.set_attribute("data-y", &format!("{}", y)).expect("no global `window` exists");
             boardDom.append_child(&div).expect("not fail");
         });
+                  console::log_1(&JsValue::from_str(&"ENNNNNNNNNNNNNDDDDDDDDDDD! row"));
     }
 
         //     console::log_1(&JsValue::from(i as u32));

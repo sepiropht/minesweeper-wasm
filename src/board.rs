@@ -38,12 +38,12 @@ pub enum LEVEL {
 
 pub fn generate(level: LEVEL) -> Vec<String> {
     let size = match level {
-        LEVEL::EASY =>  10,
-        LEVEL::MEDIUM => 50,
-        LEVEL::HARD => 100
+        LEVEL::EASY =>  9,
+        LEVEL::MEDIUM => 48,
+        LEVEL::HARD => 98
     };
 
-    let mut mines_nbr : usize = size;
+    let mut mines_nbr : usize = size + 1;
     let mut indices : Vec<usize> = (0..mines_nbr * mines_nbr).map(|indice| indice).collect();
     let mut mine_locations = vec![];
 
@@ -72,13 +72,13 @@ pub fn generate(level: LEVEL) -> Vec<String> {
                 num += 1;
                 " "
             }
-        }).collect::<Vec<&str>>().join(" ")
+        }).collect()
     }).collect();
 
-    // for (i, line) in a.iter().enumerate() {
-    //     console::log_1(&JsValue::from(i as u32));
-    //     console::log_1(&JsValue::from_str(line));
-    //     console::log_1(&JsValue::from_str(line));
-    // }
+    for (i, line) in a.iter().enumerate() {
+        console::log_1(&JsValue::from(line.len() as u32));
+        console::log_1(&JsValue::from_str(&"line.length"));
+        console::log_1(&JsValue::from_str(line));
+    }
     a
 }
