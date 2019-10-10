@@ -1,5 +1,7 @@
 extern crate js_sys;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use web_sys::console;
 
 static NEIGBOURHOOD_OFFSETS: &'static [(i32, i32)] = &[
@@ -65,7 +67,6 @@ pub fn generate(level: LEVEL) -> Vec<String> {
     }
     mine_locations.sort();
 
-
     let mut num = 0;
     (0..size)
         .enumerate()
@@ -83,4 +84,31 @@ pub fn generate(level: LEVEL) -> Vec<String> {
                 .collect()
         })
         .collect()
+}
+
+pub fn clear_adjacent_cells(x: usize, y: usize, len: usize) {
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let current_square = document
+        .query_selector(&format!("#cell-{}-{}", x, y))
+        .expect("dom node")
+        .unwrap();
+    if x < len + 1 && y < len + 1 {
+        if current_square.get_attribute("status") == Some("empty".to_string()) {
+            NEIGBOURHOOD_OFFSETS
+                .iter()
+                .map(|&(ox, oy)| (x as i32 + ox as i32, y as i32 + oy as i32))
+                .filter(|&(x, y)| {
+                    (0 <= x && x < len as i32) && (0 <= y && y < len as i32)
+                })
+                .for_each(|_| clear_adjacent_cells(x, y, len));
+        } else {
+            let value = current_square.get_attribute("value").unwrap();
+            if value.chars().next().unwrap().is_numeric() {
+                current_square.set_class_name(&format!("cleared bomb-{}", value));
+            } else {
+                current_square.set_class_name(&"square cleared");
+            }
+        }
+    }
 }

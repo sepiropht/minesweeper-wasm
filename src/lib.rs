@@ -21,45 +21,106 @@ pub fn main_js() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
     let window = web_sys::window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
-
-    let board = board::generate(board::LEVEL::EASY);
-    let boardDom = document
-        .query_selector("#board")
-        .expect("not fail")
+    init();
+    let restart_button = document
+        .query_selector("#score-restart-button")
+        .expect("dom node")
         .unwrap();
 
-    let final_board = board::annotate(board);
-    for (y, row) in final_board.iter().enumerate() {
+    let closure3 = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+        init();
+    }) as Box<dyn FnMut(_)>);
 
-        row.chars().enumerate().for_each(|(x, value)| {
-            let div = document
-                .create_element("button")
-                .expect("no global `window` exists");
-            div.set_class_name("square");
-            div.set_attribute("data-x", &format!("{}", x))
-                .expect("no global `window` exists");
-            div.set_attribute("data-y", &format!("{}", y))
-                .expect("no global `window` exists");
-            boardDom.append_child(&div).expect("not fail");
-            let cloned_div = div.clone();
-            let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
-                console::log_1(&JsValue::from(x as u32));
-                console::log_1(&JsValue::from(y as u32));
-                console::log_1(&JsValue::from_str(&value.to_string()));
-                if value == '*' {
-                    div.set_class_name("square bombed trigger");
-                } else if value.is_digit(10) {
-                     div.set_class_name(&format!("square cleared bomb-{}", value));
-                     div.set_inner_html(&value.to_string());
-                } else {
-                    div.set_class_name("square cleared");
-                }
-            }) as Box<dyn FnMut(_)>);
+    restart_button.add_event_listener_with_callback("click", closure3.as_ref().unchecked_ref());
 
-            cloned_div.add_event_listener_with_callback("click", closure.as_ref().unchecked_ref())
-                .expect("error");
-            closure.forget();
-        });
+    fn init() {
+        let board = board::generate(board::LEVEL::EASY);
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+        let boardDom = document
+            .query_selector("#board")
+            .expect("not fail")
+            .unwrap();
+        let final_board = board::annotate(board);
+        let width = final_board.len();
+        for (y, row) in final_board.iter().enumerate() {
+            row.chars().enumerate().for_each(|(x, value)| {
+                let div = document
+                    .create_element("button")
+                    .expect("no global `window` exists");
+                div.set_class_name("square");
+                div.set_attribute("data-x", &format!("{}", x))
+                    .expect("no global `window` exists");
+                div.set_attribute("data-y", &format!("{}", y))
+                    .expect("no global `window` exists");
+                div.set_attribute("id", &format!("cell-{}-{}", x, y))
+                    .expect("no global `window` exists");
+                div.set_attribute("status", &"")
+                    .expect("no global `window` exists");
+                div.set_attribute("value", &format!("{}", value))
+                    .expect("no global `window` exists");    
+                boardDom.append_child(&div).expect("not fail");
+                let cloned_div = div.clone();
+                let cloned_div1 = div.clone();
+
+                let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+                    console::log_1(&JsValue::from(x as u32));
+                    console::log_1(&JsValue::from(y as u32));
+                    console::log_1(&JsValue::from_str(&value.to_string()));
+                    if div.get_attribute("status") == Some("empty".to_string()) {
+
+                    } else if value == '*' {
+                        div.set_class_name("square bombed trigger");
+                        div.set_attribute("status", "bombed")
+                            .expect("no global `window` exists");
+                    } else if value.is_digit(10) {
+                        div.set_attribute("status", &value.to_string())
+                            .expect("no global `window` exists");
+                        div.set_class_name(&format!("square cleared bomb-{}", value));
+                        div.set_inner_html(&value.to_string());
+                    } else {
+                        div.set_attribute("status", "empty")
+                            .expect("no global `window` exists");
+                        div.set_class_name("square cleared");
+                        board::clear_adjacent_cells(x, y, width);
+                    }
+                }) as Box<dyn FnMut(_)>);
+
+                let closure2 = Closure::wrap(Box::new(move |event: web_sys::Event| {
+                    event.prevent_default();
+                    console::log_1(&JsValue::from(x as u32));
+                    console::log_1(&JsValue::from(y as u32));
+                    console::log_1(&JsValue::from_str(&value.to_string()));
+                    let score_node =  web_sys::window().expect("no global `window` exists").document().expect("should have a document on window")
+                        .query_selector("#score-bomb-count")
+                        .expect("dom node")
+                        .unwrap();
+                    use std::str::FromStr;
+                    let mut score = u32::from_str(&score_node.inner_html()).unwrap();
+                    if cloned_div1.get_attribute("status") == Some("".to_string()) {
+                        cloned_div1.set_attribute("status", "flagged")
+                            .expect("no global `window` exists");
+                        score -= 1;
+                        score_node.set_inner_html(&format!("00{}", score));
+                    } else {
+                        cloned_div1.set_attribute("status", "")
+                            .expect("no global `window` exists");
+                        score += 1;
+                        score_node.set_inner_html(&format!("00{}", score));
+                    }
+                }) as Box<dyn FnMut(_)>);
+
+                cloned_div.add_event_listener_with_callback(
+                    "contextmenu rightclick",
+                    closure2.as_ref().unchecked_ref(),
+                );
+
+                cloned_div
+                    .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref())
+                    .expect("error");
+                closure.forget();
+            });
+        }
     }
 
     Ok(())
