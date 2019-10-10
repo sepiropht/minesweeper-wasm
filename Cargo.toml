@@ -39,6 +39,8 @@ features = [
   'console',
   'Document',
   'Element',
+  'MouseEvent',
+  'EventTarget',
   'HtmlElement',
   'Node',
   'Window',
