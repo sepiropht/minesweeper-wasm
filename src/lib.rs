@@ -58,7 +58,7 @@ pub fn main_js() -> Result<(), JsValue> {
                 div.set_attribute("status", &"")
                     .expect("no global `window` exists");
                 div.set_attribute("value", &format!("{}", value))
-                    .expect("no global `window` exists");    
+                    .expect("no global `window` exists");
                 boardDom.append_child(&div).expect("not fail");
                 let cloned_div = div.clone();
                 let cloned_div1 = div.clone();
@@ -68,7 +68,6 @@ pub fn main_js() -> Result<(), JsValue> {
                     console::log_1(&JsValue::from(y as u32));
                     console::log_1(&JsValue::from_str(&value.to_string()));
                     if div.get_attribute("status") == Some("empty".to_string()) {
-
                     } else if value == '*' {
                         div.set_class_name("square bombed trigger");
                         div.set_attribute("status", "bombed")
@@ -91,30 +90,38 @@ pub fn main_js() -> Result<(), JsValue> {
                     console::log_1(&JsValue::from(x as u32));
                     console::log_1(&JsValue::from(y as u32));
                     console::log_1(&JsValue::from_str(&value.to_string()));
-                    let score_node =  web_sys::window().expect("no global `window` exists").document().expect("should have a document on window")
+                    let score_node = web_sys::window()
+                        .expect("no global `window` exists")
+                        .document()
+                        .expect("should have a document on window")
                         .query_selector("#score-bomb-count")
                         .expect("dom node")
                         .unwrap();
                     use std::str::FromStr;
                     let mut score = u32::from_str(&score_node.inner_html()).unwrap();
                     if cloned_div1.get_attribute("status") == Some("".to_string()) {
-                        cloned_div1.set_attribute("status", "flagged")
+                        cloned_div1
+                            .set_attribute("status", "flagged")
                             .expect("no global `window` exists");
                         score -= 1;
                         score_node.set_inner_html(&format!("00{}", score));
                     } else {
-                        cloned_div1.set_attribute("status", "")
+                        cloned_div1
+                            .set_attribute("status", "")
                             .expect("no global `window` exists");
                         score += 1;
                         score_node.set_inner_html(&format!("00{}", score));
                     }
                 }) as Box<dyn FnMut(_)>);
 
-                cloned_div.add_event_listener_with_callback(
-                    "contextmenu rightclick",
-                    closure2.as_ref().unchecked_ref(),
-                );
-
+                cloned_div
+                    .add_event_listener_with_callback(
+                        "contextmenu",
+                        closure2.as_ref().unchecked_ref(),
+                    )
+                    .expect("error");
+                closure2.forget();
+                    
                 cloned_div
                     .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref())
                     .expect("error");
