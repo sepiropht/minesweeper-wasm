@@ -73,13 +73,11 @@ pub fn main_js() -> Result<(), JsValue> {
                         div.set_attribute("status", "bombed")
                             .expect("no global `window` exists");
                     } else if value.is_digit(10) {
-                        div.set_attribute("status", &value.to_string())
+                        div.set_attribute("status", "clicked")
                             .expect("no global `window` exists");
                         div.set_class_name(&format!("square cleared bomb-{}", value));
                         div.set_inner_html(&value.to_string());
                     } else {
-                        div.set_attribute("status", "empty")
-                            .expect("no global `window` exists");
                         div.set_class_name("square cleared");
                         board::clear_adjacent_cells(x, y, width);
                     }
@@ -103,12 +101,14 @@ pub fn main_js() -> Result<(), JsValue> {
                         cloned_div1
                             .set_attribute("status", "flagged")
                             .expect("no global `window` exists");
+                        cloned_div1.set_class_name("square flagged");    
                         score -= 1;
                         score_node.set_inner_html(&format!("00{}", score));
                     } else {
                         cloned_div1
                             .set_attribute("status", "")
                             .expect("no global `window` exists");
+                        cloned_div1.set_class_name("square");      
                         score += 1;
                         score_node.set_inner_html(&format!("00{}", score));
                     }
@@ -121,7 +121,7 @@ pub fn main_js() -> Result<(), JsValue> {
                     )
                     .expect("error");
                 closure2.forget();
-                    
+
                 cloned_div
                     .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref())
                     .expect("error");
