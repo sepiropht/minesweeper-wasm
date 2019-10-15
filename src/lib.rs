@@ -40,12 +40,19 @@ pub fn main_js() -> Result<(), JsValue> {
         let board = board::generate(board::LEVEL::EASY);
         let window = web_sys::window().expect("no global `window` exists");
         let document = window.document().expect("should have a document on window");
+        document
+            .query_selector("#score-restart-button")
+            .expect("node")
+            .unwrap()
+            .set_class_name("");
         let boardDom = document
             .query_selector("#board")
             .expect("not fail")
             .unwrap();
         let final_board = board::annotate(board);
         let width = final_board.len();
+        // Interior mutability
+        // will work.
         let global_state: Arc<Mutex<Vec<web_sys::Element>>> = Arc::new(Mutex::new(vec![]));
 
         for (y, row) in final_board.iter().enumerate() {
@@ -90,9 +97,59 @@ pub fn main_js() -> Result<(), JsValue> {
                             .expect("no global `window` exists");
                         div.set_class_name(&format!("square cleared bomb-{}", value));
                         div.set_inner_html(&value.to_string());
+                        let ref mut global_state = *clone_global.lock().unwrap();
+                        if global_state
+                            .iter()
+                            .filter(|node| {
+                                node.get_attribute("value")
+                                    .unwrap()
+                                    .trim()
+                                    .parse::<u32>()
+                                    .is_ok()
+                            })
+                            .all(|node| node.get_attribute("status") == Some("clicked".to_string()))
+                        {
+                            console::log_1(&JsValue::from_str("You Win!!!!!!!!!!!!!"));
+                            global_state.iter().for_each(|node| {
+                                node.set_attribute("disabled", "false");
+                            });
+                            web_sys::window()
+                                .unwrap()
+                                .document()
+                                .unwrap()
+                                .query_selector("#score-restart-button")
+                                .expect("node")
+                                .unwrap()
+                                .set_class_name("success");
+                        }
                     } else {
                         div.set_class_name("square cleared");
                         board::clear_adjacent_cells(x, y, width);
+                        let ref mut global_state = *clone_global.lock().unwrap();
+                        if global_state
+                            .iter()
+                            .filter(|node| {
+                                node.get_attribute("value")
+                                    .unwrap()
+                                    .trim()
+                                    .parse::<u32>()
+                                    .is_ok()
+                            })
+                            .all(|node| node.get_attribute("status") == Some("clicked".to_string()))
+                        {
+                            console::log_1(&JsValue::from_str("You Win!!!!!!!!!!!!!"));
+                            global_state.iter().for_each(|node| {
+                                node.set_attribute("disabled", "false");
+                            });
+                            web_sys::window()
+                                .unwrap()
+                                .document()
+                                .unwrap()
+                                .query_selector("#score-restart-button")
+                                .expect("node")
+                                .unwrap()
+                                .set_class_name("success");
+                        }
                     }
                 }) as Box<dyn FnMut(_)>);
 

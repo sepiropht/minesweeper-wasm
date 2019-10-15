@@ -124,6 +124,7 @@ pub fn clear_adjacent_cells(x: usize, y: usize, len: usize) {
         console::log_1(&JsValue::from_str(&format!("number square cell-{}-{}", x, y)));
         let value = current_square.get_attribute("value").unwrap();
             current_square.set_class_name(&format!("square cleared bomb-{}", value));
+            current_square.set_attribute("status", "clicked").expect("no global `window` exists");;
             current_square.set_inner_html(&value.to_string());
     }
 }
