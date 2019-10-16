@@ -1,18 +1,24 @@
 {
-  "author": "You <you@example.com>",
-  "name": "rust-webpack-template",
-  "version": "0.1.0",
-  "scripts": {
-    "build": "rimraf dist pkg && webpack",
-    "start": "rimraf dist pkg && webpack-dev-server --open -d",
-    "test": "cargo test && wasm-pack test --headless"
-  },
-  "devDependencies": {
-    "@wasm-tool/wasm-pack-plugin": "^0.4.2",
-    "copy-webpack-plugin": "^5.0.3",
-    "webpack": "^4.33.0",
-    "webpack-cli": "^3.3.3",
-    "webpack-dev-server": "^3.7.1",
-    "rimraf": "^2.6.3"
-  }
+    "author": "You <you@example.com>",
+    "name": "rust-webpack-template",
+    "version": "0.1.0",
+    "scripts": {
+        "build": "rimraf dist pkg && webpack",
+        "start": "rimraf dist pkg && webpack-dev-server --open -d",
+        "test": "cargo test && wasm-pack test --headless",
+        "serve": "serve ./dist",
+        "deploy": "gh-pages -d dist -b gh-pages"
+    },
+    "devDependencies": {
+        "@wasm-tool/wasm-pack-plugin": "^0.4.2",
+        "copy-webpack-plugin": "^5.0.3",
+        "webpack": "^4.33.0",
+        "webpack-cli": "^3.3.3",
+        "webpack-dev-server": "^3.7.1",
+        "rimraf": "^2.6.3"
+    },
+    "dependencies": {
+        "gh-pages": "^2.1.1",
+        "serve": "^11.2.0"
+    }
 }

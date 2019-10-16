@@ -28,7 +28,8 @@ pub fn main_js() -> Result<(), JsValue> {
         .expect("dom node")
         .unwrap();
 
-    let closure3 = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+    let closure3 = Closure::wrap(Box::new(|_: web_sys::MouseEvent| {
+        console::log_1(&JsValue::from_str("yeah"));
         init();
     }) as Box<dyn FnMut(_)>);
 
