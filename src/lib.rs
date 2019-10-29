@@ -92,6 +92,10 @@ pub fn main_js() -> Result<(), JsValue> {
                         let ref mut global_state = *clone_global.lock().unwrap();
                         global_state.iter().for_each(|node| {
                             node.set_attribute("disabled", "false");
+                            if node.get_attribute("value") == Some("*".to_string()) {
+                                node.set_class_name("square bombed trigger");
+                            }
+
                         });
                     } else if value.is_digit(10) {
                         div.set_attribute("status", "clicked")
