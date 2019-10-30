@@ -51,12 +51,12 @@ pub enum LEVEL {
 pub fn generate(level: LEVEL) -> Vec<String> {
     let size = match level {
         LEVEL::EASY => 9,
-        LEVEL::MEDIUM => 48,
-        LEVEL::HARD => 98,
+        LEVEL::MEDIUM => 49,
+        LEVEL::HARD => 99,
     };
 
     let mut mines_nbr: usize = size + 1;
-    let mut indices: Vec<usize> = (0..mines_nbr * mines_nbr).map(|indice| indice).collect();
+    let mut indices: Vec<usize> = (0..size * size).map(|indice| indice).collect();
     let mut mine_locations = vec![];
 
     loop {
@@ -64,15 +64,15 @@ pub fn generate(level: LEVEL) -> Vec<String> {
             break;
         }
         let index = js_sys::Math::floor(js_sys::Math::random() * indices.len() as f64) as usize;
+        if mine_locations.iter().any(|x| index == *x) {
+            continue;
+        }
         mine_locations.push(index);
-        indices.remove(index);
-        console::log_1(&JsValue::from(index as u32));
         mines_nbr -= 1;
     }
     mine_locations.sort();
-    console::log_1(&JsValue::from_str("mine_lovation length"));
-    console::log_1(&JsValue::from(mine_locations.len() as u32));
-     console::log_1(&JsValue::from_str("mine_lovation length"));
+    //console::log_1(&JsValue::from_str("min lenght"));
+    // console::log_1(&JsValue::from(mine_locations.len() as u32));
     let mut num = 0;
     (0..size)
         .enumerate()
@@ -81,6 +81,8 @@ pub fn generate(level: LEVEL) -> Vec<String> {
                 .map(|_| {
                     if mine_locations.iter().any(|index| index == &num) {
                         num += 1;
+      //                  console::log_1(&JsValue::from_str("print *"));
+        //                console::log_1(&JsValue::from(num as u32));
                         "*"
                     } else {
                         num += 1;
@@ -96,7 +98,7 @@ pub fn clear_adjacent_cells(x: usize, y: usize, len: usize) {
     if x >= len || y >= len {
         return;
     }
-    console::log_1(&JsValue::from_str(&format!("#cell-{}-{}", x, y)));
+    //console::log_1(&JsValue::from_str(&format!("#cell-{}-{}", x, y)));
     let window = web_sys::window().expect("no global `window` exists");
     let document = window.document().expect("should have a document on window");
     let current_square = document
@@ -124,13 +126,13 @@ pub fn clear_adjacent_cells(x: usize, y: usize, len: usize) {
                 console::log_1(&JsValue::from_str("putain de merdier"));
                 clear_adjacent_cells(ox as usize, oy as usize, len)
             });
-        console::log_1(&JsValue::from_str("MERDDDDDDDDDDDDE"));
+      //  console::log_1(&JsValue::from_str("MERDDDDDDDDDDDDE"));
     } else if current_value.unwrap().chars().next().unwrap().is_numeric() {
-        console::log_1(&JsValue::from_str("NUméro"));
-        console::log_1(&JsValue::from_str(&format!(
-            "number square cell-{}-{}",
-            x, y
-        )));
+        // //console::log_1(&JsValue::from_str("NUméro"));
+        // console::log_1(&JsValue::from_str(&format!(
+        //     "number square cell-{}-{}",
+        //     x, y
+        // )));
         let value = current_square.get_attribute("value").unwrap();
         current_square.set_class_name(&format!("square cleared bomb-{}", value));
         current_square
